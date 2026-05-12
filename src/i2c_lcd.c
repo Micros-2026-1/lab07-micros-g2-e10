@@ -65,3 +65,19 @@ void lcd_clear(void)
     lcd_cmd(0x01);
     __delay_ms(2);
 }
+
+void lcd_create_char(unsigned char location, unsigned char *charmap)
+{
+    unsigned char i;
+
+    location &= 0x07;
+
+    // Entrar a CGRAM
+    lcd_cmd(0x40 | (location << 3));
+
+    // Guardar patrón
+    for(i = 0; i < 8; i++)
+    {
+        lcd_write_char(charmap[i]);
+    }
+}
