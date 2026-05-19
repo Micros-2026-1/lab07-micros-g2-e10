@@ -11,4 +11,6 @@ void lcd_write_char(char c);
 void lcd_write_string(const char *str);
 void lcd_clear(void);
 
+void lcd_create_char(unsigned char location, unsigned char *charmap);
+
 #endif
