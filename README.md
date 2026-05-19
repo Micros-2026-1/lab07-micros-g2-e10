@@ -26,10 +26,14 @@ Las dos líneas utilizadas son:
 
 * SDA, que se encarga de transportar los datos.
 * SCL, que genera la señal de reloj para sincronizar toda la comunicación.
+  
+![I2c](/Imagenes/I2c.PNG)
 
 Una de las ventajas más importantes del I²C es que permite conectar varios dispositivos esclavos al mismo bus. Cada dispositivo tiene una dirección específica, lo que permite que el maestro pueda comunicarse con cada uno de ellos de manera independiente.
 
-En este laboratorio, el PIC18F45K22 funcionó como maestro, mientras que el módulo PCF8574 actuó como esclavo encargado de controlar la pantalla LCD.
+En este laboratorio, el PIC18F45K22 funcionó como maestro, mientras que el módulo PCF8574 actuó como esclavo encargado de controlar la pantalla LCD.Mediante los registros que se van aconfigurar para su funcionamiento.
+
+![I2c](/Imagenes/ArqI2c.PNG)
 
 La comunicación se realiza enviando información en forma de bytes. Todo comienza con una condición Start generada por el maestro, luego se envía la dirección del dispositivo junto con el bit de lectura o escritura, después se transmiten los datos y finalmente se genera una condición Stop para terminar la comunicación.
 
@@ -81,6 +85,8 @@ Entre las funciones principales del MSSP se encuentran:
 El funcionamiento correcto de este módulo depende de varios registros internos como SSPCON1, SSPCON2, SSPSTAT y SSPBUF, los cuales deben configurarse adecuadamente para garantizar una comunicación estable y sin errores.
 
 ## Diagramas
+#### Configuracion I2C
+![I2c](/Imagenes/Diagrama.PNG)
 
 ## Evidencias de implementación
 
@@ -94,59 +100,59 @@ VIDEO DE IMPLEMENTACION.
 
 * El protocolo I²C se considera una comunicación half-duplex porque los datos solo pueden viajar en una dirección a la vez. Esto significa que mientras un dispositivo transmite información, el otro únicamente recibe, pero no pueden transmitir simultáneamente. En el bus I²C todos los dispositivos comparten la misma línea de datos SDA, por lo que la comunicación debe organizarse para evitar colisiones.
 
-En cambio, SPI se clasifica como full-duplex porque puede enviar y recibir datos al mismo tiempo. Esto es posible gracias a que utiliza líneas separadas para transmisión y recepción de datos. SPI normalmente trabaja con las líneas MOSI (Master Out Slave In) y MISO (Master In Slave Out), permitiendo una comunicación simultánea en ambas direcciones.
+    En cambio, SPI se clasifica como full-duplex porque puede enviar y recibir datos al mismo tiempo. Esto es posible gracias a que utiliza líneas separadas para transmisión y recepción de datos. SPI normalmente trabaja con las líneas MOSI (Master Out Slave In) y MISO (Master In Slave Out), permitiendo una comunicación simultánea en ambas direcciones.
 
 2. En I2C_init() se asigna SSPCON1 = 0x28. Desglose ese valor bit a bit e identifique qué modo de operación del MSSP se está seleccionando y por qué se elige ese valor.
 
 * Los cuatro bits menos significativos (SSPM3:SSPM0 = 1000) configuran el módulo MSSP en modo:
 
-```I²C Master mode, clock = FOSC / (4 * (SSPADD + 1))```
+    ```I²C Master mode, clock = FOSC / (4 * (SSPADD + 1))```
 
-Esto significa que el PIC actuará como maestro dentro del bus I²C y generará automáticamente la señal de reloj SCL.
+    Esto significa que el PIC actuará como maestro dentro del bus I²C y generará automáticamente la señal de reloj SCL.
 
-El bit ```SSPEN = 1``` habilita físicamente el módulo MSSP y permite que los pines RC3 y RC4 funcionen como líneas SCL y SDA.
+    El bit ```SSPEN = 1``` habilita físicamente el módulo MSSP y permite que los pines RC3 y RC4 funcionen como líneas SCL y SDA.
 
-Este valor se utiliza porque permite que el microcontrolador controle completamente la comunicación I²C y genere la frecuencia adecuada mediante el registro SSPADD.
+    Este valor se utiliza porque permite que el microcontrolador controle completamente la comunicación I²C y genere la frecuencia adecuada mediante el registro SSPADD.
 
 3. Las funciones I2C_start(), I2C_stop() e I2C_write() comparten el mismo patrón: activar un bit de control y luego esperar con while(!PIR1bits.SSPIF). ¿Qué representa la bandera SSPIF y por qué se limpia después de cada operación?.
 
 * La bandera SSPIF pertenece al registro PIR1 y significa:
 
-```Synchronous Serial Port Interrupt Flag```
+    ```Synchronous Serial Port Interrupt Flag```
 
-Esta bandera indica que una operación del módulo MSSP ha finalizado correctamente.
+    Esta bandera indica que una operación del módulo MSSP ha finalizado correctamente.
 
-Cuando se ejecuta una acción como:
+    Cuando se ejecuta una acción como:
 
-* generar un Start,
-* enviar un byte,
-* recibir datos,
-* generar un Stop,
+  * generar un Start,
+  * enviar un byte,
+  * recibir datos,
+  * generar un Stop,
 
-el hardware del módulo MSSP trabaja automáticamente. Una vez termina esa tarea, el bit SSPIF cambia a 1 para avisar que la operación ya finalizó.
-Esto se hace porque si no se limpia, el programa podría interpretar erróneamente que una nueva operación ya terminó, generando errores de sincronización en la comunicación I²C.
+    el hardware del módulo MSSP trabaja automáticamente. Una vez termina esa tarea, el bit SSPIF cambia a 1 para avisar que la operación ya finalizó.
+    Esto se hace porque si no se limpia, el programa podría interpretar erróneamente que una nueva operación ya terminó, generando errores de sincronización en la comunicación I²C.
 
-4. El fuse PBADEN = OFF está presente en la configuración. ¿Qué efecto tendría dejarlo en ON sobre los pines del puerto B, y por qué podría causar problemas si se usan esos pines como salidas digitales?.
+1. El fuse PBADEN = OFF está presente en la configuración. ¿Qué efecto tendría dejarlo en ON sobre los pines del puerto B, y por qué podría causar problemas si se usan esos pines como salidas digitales?.
 
-* El fuse ```PBADEN``` controla el comportamiento inicial de algunos pines del puerto B en el PIC18F45K22, los pines RB0, RB1, RB2, RB3 y RB4 se configuran inicialmente como entradas analógicas después del reset.
+   * El fuse ```PBADEN``` controla el comportamiento inicial de algunos pines del puerto B en el PIC18F45K22, los pines RB0, RB1, RB2, RB3 y RB4 se configuran inicialmente como entradas analógicas después del reset.
 
-5. Compare el control de la LCD en modo paralelo (lab04) con el modo I²C de este laboratorio. Mencione ventajas y desventajas de cada enfoque en términos de: cantidad de pines usados, velocidad de actualización y complejidad del código.
+2. Compare el control de la LCD en modo paralelo (lab04) con el modo I²C de este laboratorio. Mencione ventajas y desventajas de cada enfoque en términos de: cantidad de pines usados, velocidad de actualización y complejidad del código.
 
-* El modo paralelo y el modo I²C permiten controlar la misma pantalla LCD, pero funcionan de manera muy diferente.
+   * El modo paralelo y el modo I²C permiten controlar la misma pantalla LCD, pero funcionan de manera muy diferente.
 
-En el modo paralelo, la LCD se conecta directamente al microcontrolador mediante varias líneas de datos y control. Dependiendo de la configuración, pueden utilizarse entre 6 y 8 pines.
+    En el modo paralelo, la LCD se conecta directamente al microcontrolador mediante varias líneas de datos y control. Dependiendo de la configuración, pueden utilizarse entre 6 y 8 pines.
 
-La principal ventaja del modo paralelo es su velocidad. Como los datos se transmiten directamente por varias líneas al mismo tiempo, la actualización de la pantalla es mucho más rápida.
+    La principal ventaja del modo paralelo es su velocidad. Como los datos se transmiten directamente por varias líneas al mismo tiempo, la actualización de la pantalla es mucho más rápida.
 
-Sin embargo, tiene la desventaja de consumir muchos pines del microcontrolador, lo que puede limitar la conexión de otros dispositivos.
+    Sin embargo, tiene la desventaja de consumir muchos pines del microcontrolador, lo que puede limitar la conexión de otros dispositivos.
 
-Por otro lado, el modo I²C utiliza únicamente dos líneas de comunicación gracias al módulo PCF8574. Esto simplifica mucho el montaje físico y permite ahorrar una gran cantidad de pines.
+    Por otro lado, el modo I²C utiliza únicamente dos líneas de comunicación gracias al módulo PCF8574. Esto simplifica mucho el montaje físico y permite ahorrar una gran cantidad de pines.
 
-La desventaja principal es que la comunicación se vuelve más lenta, ya que los datos deben transmitirse serialmente y además existe una sobrecarga adicional relacionada con el protocolo I²C.
+    La desventaja principal es que la comunicación se vuelve más lenta, ya que los datos deben transmitirse serialmente y además existe una sobrecarga adicional relacionada con el protocolo I²C.
 
-En cuanto al código, el modo paralelo suele ser más simple porque el microcontrolador controla directamente las señales de la LCD. En cambio, el modo I²C requiere funciones adicionales para manejar el protocolo serial, las direcciones esclavas y la sincronización del bus.
+    En cuanto al código, el modo paralelo suele ser más simple porque el microcontrolador controla directamente las señales de la LCD. En cambio, el modo I²C requiere funciones adicionales para manejar el protocolo serial, las direcciones esclavas y la sincronización del bus.
 
-6. El bus I²C permite conectar múltiples esclavos con solo dos hilos. Si se quisiera agregar un segundo módulo PCF8574 al mismo bus (por ejemplo, para controlar un segundo LCD), ¿qué cambio mínimo sería necesario en el hardware y en el código?
+1. El bus I²C permite conectar múltiples esclavos con solo dos hilos. Si se quisiera agregar un segundo módulo PCF8574 al mismo bus (por ejemplo, para controlar un segundo LCD), ¿qué cambio mínimo sería necesario en el hardware y en el código?
 
 * Para agregar un segundo módulo PCF8574 al mismo bus I²C, el cambio más importante sería modificar la dirección del nuevo dispositivo.
 
