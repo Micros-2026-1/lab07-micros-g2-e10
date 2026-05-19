@@ -5,66 +5,71 @@
 ## Integrantes
 
 * [JUAN CAMILO SAMPER](https://github.com/CamiloSp22)
+
 * [CRISTIAN FABIAN LOZANO](https://github.com/cristianfalozanoav)
 
 ## Documentación
 
-En este laboratorio se trabajó la comunicación entre un microcontrolador PIC18F45K22 y una pantalla LCD 16x2 utilizando el protocolo de comunicación I²C. El objetivo principal fue aprender a configurar el módulo MSSP del microcontrolador en modo maestro para poder enviar información hacia un módulo expansor PCF8574, el cual permite controlar la pantalla LCD usando únicamente dos líneas de comunicación.
+En este laboratorio se trabajó la comunicación entre un microcontrolador PIC18F45K22 y una pantalla LCD 16x2 usando el protocolo I²C. La idea principal fue aprender a configurar el módulo MSSP del PIC en modo maestro para poder enviar información hacia un módulo PCF8574, el cual permite controlar la LCD utilizando únicamente dos líneas de comunicación.
 
-Normalmente, una LCD en modo paralelo necesita entre 6 y 8 pines del microcontrolador para funcionar correctamente. Esto puede convertirse en una limitación cuando se necesitan más periféricos o entradas y salidas disponibles. Gracias al uso del protocolo I²C y del adaptador PCF8574, fue posible reducir la cantidad de conexiones a solamente dos líneas: SDA y SCL.
+Normalmente, una pantalla LCD conectada en modo paralelo necesita entre 6 y 8 pines del microcontrolador para funcionar correctamente. Esto puede ser un problema cuando se necesitan más entradas y salidas para conectar sensores, botones u otros dispositivos. Gracias al protocolo I²C y al módulo PCF8574, fue posible reducir todas esas conexiones a solo dos líneas: SDA y SCL, haciendo el circuito mucho más organizado y fácil de manejar.
 
-Durante el desarrollo del laboratorio también se implementaron diferentes funcionalidades sobre la LCD, como la visualización de texto estático, el desplazamiento de cadenas de caracteres y la creación de caracteres personalizados. Todo esto permitió comprender mejor cómo se transmiten datos y comandos mediante el bus I²C y cómo interactúa el microcontrolador con dispositivos externos.
+Durante el desarrollo del laboratorio también se implementaron varias funciones en la LCD, como mostrar texto fijo, desplazar mensajes en pantalla y crear caracteres personalizados. Estas actividades ayudaron a entender mejor cómo se envían datos y comandos a través del bus I²C y cómo el microcontrolador interactúa con dispositivos externos.
 
-Además, este laboratorio ayudó a reforzar conceptos relacionados con protocolos seriales, manejo de registros internos del PIC y control de periféricos digitales, mostrando una aplicación práctica muy utilizada en sistemas embebidos y proyectos electrónicos.
+Además, la práctica permitió reforzar temas importantes relacionados con comunicación serial, configuración de registros internos del PIC y manejo de periféricos digitales, mostrando una aplicación muy común en sistemas embebidos y proyectos electrónicos.
 
 **Protocolo I²C**
 
-El protocolo I²C, es un sistema de comunicación serial síncrona ampliamente utilizado en sistemas electrónicos y microcontroladores. Su principal característica es que utiliza únicamente dos líneas para transmitir información, lo que simplifica considerablemente el diseño de los circuitos.
+El protocolo I²C es un sistema de comunicación serial muy utilizado en electrónica y microcontroladores porque permite conectar varios dispositivos usando solamente dos líneas de comunicación. Esto ayuda a simplificar bastante el diseño de los circuitos y reduce la cantidad de cables necesarios.
 
-La primera línea es SDA, encargada de transportar los datos, mientras que la segunda línea es SCL, utilizada para sincronizar la comunicación mediante pulsos de reloj generados por el dispositivo maestro.
+Las dos líneas utilizadas son:
 
-Una de las mayores ventajas del protocolo I²C es que permite conectar múltiples dispositivos esclavos sobre el mismo bus de comunicación. Cada dispositivo posee una dirección única que permite identificarlo y establecer comunicación individualmente.
+* SDA, que se encarga de transportar los datos.
+* SCL, que genera la señal de reloj para sincronizar toda la comunicación.
 
-En este laboratorio, el PIC18F45K22 actuó como maestro, mientras que el módulo PCF8574 funcionó como esclavo encargado de controlar la pantalla LCD.
+Una de las ventajas más importantes del I²C es que permite conectar varios dispositivos esclavos al mismo bus. Cada dispositivo tiene una dirección específica, lo que permite que el maestro pueda comunicarse con cada uno de ellos de manera independiente.
 
-La comunicación I²C se realiza mediante paquetes de datos organizados en bytes. Cada transmisión comienza con una condición Start generada por el maestro, seguida de la dirección del dispositivo esclavo y un bit que indica si la operación será de lectura o escritura. Posteriormente se transmiten los datos y finalmente se genera una condición Stop para finalizar la comunicación.
+En este laboratorio, el PIC18F45K22 funcionó como maestro, mientras que el módulo PCF8574 actuó como esclavo encargado de controlar la pantalla LCD.
+
+La comunicación se realiza enviando información en forma de bytes. Todo comienza con una condición Start generada por el maestro, luego se envía la dirección del dispositivo junto con el bit de lectura o escritura, después se transmiten los datos y finalmente se genera una condición Stop para terminar la comunicación.
 
 **Comunicación half-duplex**
 
-La comunicación I²C trabaja en modo half-duplex, lo que significa que la información viaja en una sola dirección a la vez. Esto quiere decir que mientras un dispositivo transmite, el otro únicamente recibe.
+El protocolo I²C trabaja en modo half-duplex, lo que significa que la información solo puede viajar en una dirección a la vez. Es decir, mientras un dispositivo transmite datos, el otro únicamente recibe.
 
-Aunque esto puede hacer que la velocidad de transmisión sea menor comparada con otros protocolos, el I²C tiene la ventaja de reducir el número de conexiones físicas y facilitar la integración de múltiples dispositivos.
+Aunque esto hace que la comunicación sea un poco más lenta comparada con otros protocolos, tiene la ventaja de reducir la cantidad de conexiones físicas y facilitar la integración de varios dispositivos en el mismo bus.
 
-Este comportamiento es diferente al protocolo SPI, el cual trabaja en modo full-duplex y permite transmitir y recibir datos simultáneamente.
+Esto es diferente al protocolo SPI, el cual trabaja en modo full-duplex y permite enviar y recibir información al mismo tiempo utilizando líneas separadas para transmisión y recepción.
 
 **Módulo PCF8574**
 
-El PCF8574 es un expansor de entradas y salidas digitales que permite controlar dispositivos paralelos utilizando comunicación I²C.
+El PCF8574 es un expansor de entradas y salidas digitales que permite controlar dispositivos paralelos mediante comunicación I²C.
 
-En este caso, el módulo se encargó de recibir los datos seriales enviados por el PIC y convertirlos en señales paralelas entendibles para la pantalla LCD.
+En este laboratorio, el módulo recibió los datos seriales enviados por el PIC y los convirtió en señales paralelas que la pantalla LCD puede entender.
 
-Gracias al uso de este módulo, fue posible controlar completamente la LCD utilizando solamente dos líneas del microcontrolador:
+Gracias a este módulo fue posible controlar completamente la LCD utilizando solamente dos líneas del microcontrolador:
 
-* RC3 → SCL
-* RC4 → SDA
+```RC3 → SCL```
 
-Esto representó una gran ventaja frente al modo paralelo tradicional.
+```RC4 → SDA```
 
-El PCF8574 generalmente utiliza la dirección base 0x27. Sin embargo, en la comunicación I²C la dirección debe incluir un bit adicional de lectura o escritura, por lo que la dirección utilizada realmente fue:
+Esto representó una gran ventaja frente al modo paralelo tradicional, ya que redujo considerablemente la cantidad de cables y pines utilizados.
 
-* 0x27 << 1 = 0x4E
+El PCF8574 normalmente utiliza la dirección base 0x27. Sin embargo, en la comunicación I²C la dirección debe incluir el bit de lectura o escritura, por lo que la dirección utilizada realmente fue:
 
-Por esta razón, dentro del código se definió:
+```0x27 << 1 = 0x4E```
 
-* #define LCD_ADDR 0x4E
+Por esa razón en el código se definió:
+
+```#define LCD_ADDR 0x4E```
 
 **Módulo MSSP del PIC18F45K22**
 
-El microcontrolador PIC18F45K22 incluye el módulo MSSP (Master Synchronous Serial Port), diseñado para manejar protocolos de comunicación serial como SPI e I²C.
+El PIC18F45K22 cuenta con el módulo MSSP (Master Synchronous Serial Port), diseñado para trabajar con protocolos seriales como SPI e I²C.
 
-Cuando se configura en modo I²C maestro, el MSSP se encarga automáticamente de generar la señal de reloj, administrar la transmisión de datos y detectar eventos importantes dentro de la comunicación.
+Cuando se configura en modo I²C maestro, el MSSP se encarga automáticamente de generar la señal de reloj, controlar la transmisión de datos y detectar diferentes eventos importantes durante la comunicación.
 
-Entre las funciones principales del módulo MSSP se encuentran:
+Entre las funciones principales del MSSP se encuentran:
 
 * Generación de condiciones Start y Stop.
 * Manejo del reloj serial.
@@ -73,11 +78,15 @@ Entre las funciones principales del módulo MSSP se encuentran:
 * Manejo de bits ACK.
 * Control de buffers de transmisión y recepción.
 
-El funcionamiento del MSSP depende de varios registros internos como SSPCON1, SSPCON2, SSPSTAT y SSPBUF, los cuales deben configurarse correctamente para garantizar una comunicación estable.
+El funcionamiento correcto de este módulo depende de varios registros internos como SSPCON1, SSPCON2, SSPSTAT y SSPBUF, los cuales deben configurarse adecuadamente para garantizar una comunicación estable y sin errores.
 
 ## Diagramas
 
 ## Evidencias de implementación
+
+VIDEO DE IMPLEMENTACION.
+
+* [Practica Lab 7](https://youtu.be/l_CXYy5-IUk)
 
 ## Preguntas
 
